@@ -116,7 +116,7 @@ async function prodRelease(notes, context) {
 async function getRefProdCommit() {
     let prodVersion;
     try {
-        prodVersion = await getTagHead('production', {cwd, env});
+        prodVersion = await getTagHead('Production', {cwd, env});
     } catch (error) {
         prodVersion = await getFirstCommit({cwd, env});
     }
