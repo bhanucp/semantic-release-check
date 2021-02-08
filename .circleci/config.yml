@@ -50,11 +50,31 @@ jobs:
         - checkout
         - git-tag:
             tag: "Production"
+  github-prod-release:
+    executor: node-executor
+    steps:
+      - checkout
+      - restore_cache:
+            name: "Restore release dependencies"
+            keys:
+              - release-{{ .Environment.CACHE_VERSION }}
+      - run:
+          name: "Create prod release"
+          command: node ./release.js
   release:
       executor: node-executor
       steps:
         - checkout
+        - restore_cache:
+              name: "Restore release dependencies"
+              keys:
+                - release-{{ .Environment.CACHE_VERSION }}
         - run: npx semantic-release
+        - save_cache:
+            name: "Save release dependencies"
+            key: release-{{ .Environment.CACHE_VERSION }}
+            paths:
+              - ./node_modules
 workflows:
   version: 2
   build-test-and-release:
@@ -99,8 +119,6 @@ workflows:
           requires:
             - deploy-code-to-uat
       - deploy-code-to-prod:
-          context:
-            - prod-approval
           filters:
             # ignore any commit on any branch by default
             branches:
@@ -110,7 +128,7 @@ workflows:
               only: /^v[0-9]+(\.[0-9]+)*$/
           requires:
             - release-to-prod-approval
-      - git-tag-prod:
+      - github-prod-release:
           filters:
             # ignore any commit on any branch by default
             branches:
@@ -120,3 +138,13 @@ workflows:
               only: /^v[0-9]+(\.[0-9]+)*$/
           requires:
             - deploy-code-to-prod
+      - git-tag-prod:
+          filters:
+            # ignore any commit on any branch by default
+            branches:
+              ignore: /.*/
+            # only act on version tags
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*$/
+          requires:
+            - github-prod-release
