@@ -13,7 +13,7 @@ commands:
     steps:
       - add_ssh_keys:
           fingerprints:
-            - "c9:ac:9f:ed:85:4e:4e:a8:a5:b4:1d:ba:7e:5a:a9:8f"
+            - "9d:14:75:38:9b:c7:03:cc:15:84:24:21:e1:d2:19:63"
       - run: |
           git config --global user.email "{{ .Environment.git_username }}"
           git config --global user.name "{{ .Environment.git_useremail }}"
