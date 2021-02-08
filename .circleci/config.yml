@@ -52,6 +52,7 @@ jobs:
             tag: "Production"
   github-prod-release:
     executor: node-executor
+    working_directory: ~/project/release
     steps:
       - checkout
       - restore_cache:
@@ -59,22 +60,22 @@ jobs:
             keys:
               - release-{{ .Environment.CACHE_VERSION }}
       - run:
+          name: "Install npm dependencies"
+          command: npm install
+      - run:
           name: "Create prod release"
           command: node ./release.js
+      - save_cache:
+          name: "Save release dependencies"
+          key: release-{{ .Environment.CACHE_VERSION }}
+          paths:
+            - ./node_modules
   release:
       executor: node-executor
       steps:
         - checkout
-        - restore_cache:
-              name: "Restore release dependencies"
-              keys:
-                - release-{{ .Environment.CACHE_VERSION }}
         - run: npx semantic-release
-        - save_cache:
-            name: "Save release dependencies"
-            key: release-{{ .Environment.CACHE_VERSION }}
-            paths:
-              - ./node_modules
+
 workflows:
   version: 2
   build-test-and-release:
