@@ -74,17 +74,11 @@ async function getLatestTaggedCommit(execaOptions) {
 }
 
 async function getVersionFromCommit({commit, execaOptions}) {
-    //console.log("commit: " + commit);
     return (await execa('git', ['tag', '--points-at', commit], execaOptions)).stdout.split('\n').filter((value) => /^v/.test(value));
 }
 
-// async function getProdVersionFromCommit({commit, execaOptions}) {
-//     return (await execa('git', ['tag', '--points-at', commit], execaOptions)).stdout.split('\n').filter((value) => /^v/.test(value));
-// }
-
 async function getLatestTag(execaOptions) {
     const latestSha = await getLatestTaggedCommit(execaOptions);
-    // return (await execa('git', ['describe', '--tags', latestSha], execaOptions)).stdout;
     return await getVersionFromCommit({commit: latestSha, execaOptions});
 }
 
@@ -149,8 +143,10 @@ async function getRepoDetails() {
     return {repositoryUrl, owner, repo};
 }
 
-async function generateNotes({parsedCommits, gitTag, repo, urlHome, owner,
-                                 previousTag, currentTag, linkCompare, writerOpts} = {}) {
+async function generateNotes({
+                                 parsedCommits, gitTag, repo, urlHome, owner,
+                                 previousTag, currentTag, linkCompare, writerOpts
+                             } = {}) {
     return await getStream(intoStream.object(parsedCommits).pipe(writer({
         version: gitTag,
         repository: repo,
@@ -219,8 +215,8 @@ function getParsedCommits(commits, parserOpts) {
         const parsedCommits = getParsedCommits(commits, parserOpts);
         context.previousTag = prodVersion;
         context.currentTag = context.gitTag;
-        //console.log(`${context.currentTag} .. ${context.previousTag}`);
-        if (context.currentTag == context.previousTag){
+
+        if (context.currentTag == context.previousTag) {
             console.log(`Prod release is already pointing to the latest tag ${context.currentTag}`)
             return;
         }
