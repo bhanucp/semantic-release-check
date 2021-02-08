@@ -230,6 +230,7 @@ function getParsedCommits(commits, parserOpts) {
         const {repositoryUrl, owner, repo} = await getRepoDetails();
         let {hostname, port, protocol} = extractURL(repositoryUrl);
         const urlHome = format({protocol, host: hostname, port});
+        console.log(`URL Home: ${urlHome}`);
         const options = {
             gitTag: context.gitTag,
             previousTag: context.previousTag,
