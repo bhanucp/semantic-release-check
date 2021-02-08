@@ -54,9 +54,8 @@ jobs:
     executor: node-executor
     working_directory: ~/project/release
     steps:
-      - checkout
+      - checkout:
           path: ~/project
-
       - restore_cache:
             name: "Restore release dependencies"
             keys:
