@@ -229,6 +229,7 @@ function getParsedCommits(commits, parserOpts) {
         // build args to generate notes
         const {repositoryUrl, owner, repo} = await getRepoDetails();
         let {hostname, port, protocol} = extractURL(repositoryUrl);
+        protocol = protocol.replace('ssh', 'https')
         const urlHome = format({protocol, host: hostname, port});
         console.log(`URL Home: ${urlHome}`);
         const options = {
