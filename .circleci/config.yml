@@ -1,0 +1,122 @@
+version: 2.1
+executors:
+  node-executor:
+    docker:
+      - image: cimg/node:14.15.3
+commands:
+  git-tag:
+    description: "Tag current git commit with 'tag'"
+    parameters:
+      tag:
+        type: string
+        default: ""
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "c9:ac:9f:ed:85:4e:4e:a8:a5:b4:1d:ba:7e:5a:a9:8f"
+      - run: |
+          git config --global user.email "{{ .Environment.git_username }}"
+          git config --global user.name "{{ .Environment.git_useremail }}"
+          git tag -fa "<< parameters.tag >>" -m "<< parameters.tag >>"
+          git push -f origin --tags
+jobs:
+  build-and-test:
+    executor: node-executor
+    steps:
+      - checkout
+  deploy-code-to-uat:
+      executor: node-executor
+      steps:
+        - run:
+            name: "Release to UAT"
+            command: |
+              echo "Approved to  deploy in UAT"
+  deploy-code-to-prod:
+      executor: node-executor
+      steps:
+        - run:
+            name: "Release to Prod"
+            command: |
+              echo "Approved to  deploy in Prod"
+  git-tag-uat:
+      executor: node-executor
+      steps:
+        - checkout
+        - git-tag:
+            tag: "UAT"
+  git-tag-prod:
+      executor: node-executor
+      steps:
+        - checkout
+        - git-tag:
+            tag: "Production"
+  release:
+      executor: node-executor
+      steps:
+        - checkout
+        - run: npx semantic-release
+workflows:
+  version: 2
+  build-test-and-release:
+    # Run the build followed by executing the tests
+    jobs:
+      - build-and-test
+      - release:
+          filters:
+            branches:
+              only: main
+          requires:
+            - build-and-test
+  run-release-workflow:
+    jobs:
+      - deploy-code-to-uat:
+          filters:
+            # ignore any commit on any branch by default
+            branches:
+              ignore: /.*/
+            # only act on version tags
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*$/
+      - git-tag-uat:
+          filters:
+            # ignore any commit on any branch by default
+            branches:
+              ignore: /.*/
+            # only act on version tags
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*$/
+          requires:
+            - deploy-code-to-uat
+      - release-to-prod-approval:
+          type: approval
+          filters:
+            # ignore any commit on any branch by default
+            branches:
+              ignore: /.*/
+            # only act on version tags
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*$/
+          requires:
+            - deploy-code-to-uat
+      - deploy-code-to-prod:
+          context:
+            - prod-approval
+          filters:
+            # ignore any commit on any branch by default
+            branches:
+              ignore: /.*/
+            # only act on version tags
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*$/
+          requires:
+            - release-to-prod-approval
+      - git-tag-prod:
+          filters:
+            # ignore any commit on any branch by default
+            branches:
+              ignore: /.*/
+            # only act on version tags
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*$/
+          requires:
+            - deploy-code-to-prod
