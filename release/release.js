@@ -73,13 +73,19 @@ async function getLatestTaggedCommit(execaOptions) {
     return env.CIRCLE_TAG || (await execa('git', ['rev-list', '--tags', '--max-count=1'], execaOptions)).stdout;
 }
 
-async function getProdVersionFromCommit({commit, execaOptions}) {
+async function getVersionFromCommit({commit, execaOptions}) {
+    console.log("commit: " + commit);
     return (await execa('git', ['tag', '--points-at', commit], execaOptions)).stdout.split('\n').filter((value) => /^v/.test(value));
 }
 
+// async function getProdVersionFromCommit({commit, execaOptions}) {
+//     return (await execa('git', ['tag', '--points-at', commit], execaOptions)).stdout.split('\n').filter((value) => /^v/.test(value));
+// }
+
 async function getLatestTag(execaOptions) {
     const latestSha = await getLatestTaggedCommit(execaOptions);
-    return (await execa('git', ['describe', '--tags', latestSha], execaOptions)).stdout;
+    // return (await execa('git', ['describe', '--tags', latestSha], execaOptions)).stdout;
+    return await getVersionFromCommit({commit: latestSha, execaOptions});
 }
 
 function getClient() {
@@ -103,8 +109,7 @@ async function prodRelease(notes, context) {
         body: notes,
         prerelease: false,
     };
-    const response = await context.client.repos.createRelease(release);
-    return response;
+    return await context.client.repos.createRelease(release);
 }
 
 
@@ -159,7 +164,7 @@ async function generateNotes({parsedCommits, gitTag, repo, urlHome, owner,
 
 function extractURL(repositoryUrl) {
     const [match, auth, host, path] = /^(?!.+:\/\/)(?:(?<auth>.*)@)?(?<host>.*?):(?<path>.*)$/.exec(repositoryUrl) || [];
-    let {hostname, port, pathname, protocol} = new URL(
+    let {hostname, port, protocol} = new URL(
         match ? `ssh://${auth ? `${auth}@` : ''}${host}/${path}` : repositoryUrl
     );
     return {host, hostname, port, protocol};
@@ -199,10 +204,12 @@ function getParsedCommits(commits, parserOpts) {
     try {
         context.gitTag = await getLatestTag({cwd, env});
         context.prodCommit = await getRefProdCommit();
-        const [prodVersion,] = await getProdVersionFromCommit({
+        let [prodVersion,] = await getVersionFromCommit({
             commit: context.prodCommit,
             execOptions: {cwd, env}
         });
+        // if prodVersion is null(first ever prod release), then set ref commit to first commit.
+        prodVersion = prodVersion || context.prodCommit;
         const {writerOpts, parserOpts} = await generateChangeLogContext();
 
         // generate commits from last known prod version till circleTag.
