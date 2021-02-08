@@ -74,7 +74,7 @@ async function getLatestTaggedCommit(execaOptions) {
 }
 
 async function getVersionFromCommit({commit, execaOptions}) {
-    console.log("commit: " + commit);
+    //console.log("commit: " + commit);
     return (await execa('git', ['tag', '--points-at', commit], execaOptions)).stdout.split('\n').filter((value) => /^v/.test(value));
 }
 
@@ -219,6 +219,11 @@ function getParsedCommits(commits, parserOpts) {
         const parsedCommits = getParsedCommits(commits, parserOpts);
         context.previousTag = prodVersion;
         context.currentTag = context.gitTag;
+        //console.log(`${context.currentTag} .. ${context.previousTag}`);
+        if (context.currentTag == context.previousTag){
+            console.log(`Prod release is already pointing to the latest tag ${context.currentTag}`)
+            return;
+        }
         const linkCompare = context.currentTag && context.previousTag;
 
         // build args to generate notes
