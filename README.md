@@ -1,3 +1,3 @@
-# semantic-release-check
+## semantic-release-check
 Commit to understand semantic release changes.
 
