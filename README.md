@@ -1,3 +1,3 @@
 # semantic-release-check
-test semantic-release
+Commit to validate semantic release changes.
 
