@@ -52,10 +52,8 @@ jobs:
             tag: "Production"
   github-prod-release:
     executor: node-executor
-    working_directory: ~/project/release
     steps:
-      - checkout:
-          path: ~/project
+      - checkout
       - restore_cache:
             name: "Restore release dependencies"
             keys:
@@ -70,7 +68,7 @@ jobs:
           name: "Save release dependencies"
           key: release-{{ .Environment.CACHE_VERSION }}
           paths:
-            - ./release/node_modules
+            - ./node_modules
   release:
       executor: node-executor
       steps:

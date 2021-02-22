@@ -1,0 +1,15 @@
+{
+  "name": "release",
+  "version": "1.0.0",
+  "description": "create a new github prod release.",
+  "main": "release.js",
+  "scripts": {
+    "release:uat": "npx sfdc-release -e UAT",
+    "release:prod": "npx sfdc-release -e Production"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@bhanucp/digital-app-release": "^1.1.1"
+  }
+}
