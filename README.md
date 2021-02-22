@@ -1,3 +1,3 @@
 ### semantic-release-check
-Commit to understand semantic release changes.  
+Commit to understand semantic release changes.   
 
