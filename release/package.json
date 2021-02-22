@@ -4,23 +4,12 @@
   "description": "create a new github prod release.",
   "main": "release.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "release:uat": "npx sfdc-release -e UAT",
+    "release:prod": "npx sfdc-release -e Production"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@octokit/rest": "^18.1.0",
-    "conventional-changelog-angular": "^5.0.12",
-    "conventional-changelog-writer": "^5.0.0",
-    "conventional-commits-filter": "^2.0.7",
-    "conventional-commits-parser": "^3.2.0",
-    "execa": "^5.0.0",
-    "get-stream": "^6.0.0",
-    "git-log-parser": "^1.2.0",
-    "into-stream": "^6.0.0",
-    "marked": "^2.0.0",
-    "marked-terminal": "^4.1.0",
-    "parser": "^0.1.4",
-    "url": "^0.11.0"
+    "@bhanucp/digital-app-release": "^1.1.0"
   }
 }

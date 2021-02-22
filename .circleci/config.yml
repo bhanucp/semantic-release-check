@@ -65,7 +65,7 @@ jobs:
           command: npm install
       - run:
           name: "Create prod release"
-          command: node ./release.js
+          command: npm run release:prod
       - save_cache:
           name: "Save release dependencies"
           key: release-{{ .Environment.CACHE_VERSION }}
