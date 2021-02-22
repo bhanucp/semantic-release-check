@@ -1,8 +1,3 @@
-# semantic-release-check
-test semantic-release
-dddd
-dddddd
-ddddd
+### semantic-release-check
+Commit to understand semantic release changes.
 
-ddd
-Added feat
