@@ -69,6 +69,25 @@ jobs:
           key: release-{{ .Environment.CACHE_VERSION }}
           paths:
             - ./node_modules
+  github-uat-release:
+    executor: node-executor
+    steps:
+      - checkout
+      - restore_cache:
+          name: "Restore release dependencies"
+          keys:
+            - release-{{ .Environment.CACHE_VERSION }}
+      - run:
+          name: "Install npm dependencies"
+          command: npm install
+      - run:
+          name: "Create prod release"
+          command: npm run release:uat
+      - save_cache:
+          name: "Save release dependencies"
+          key: release-{{ .Environment.CACHE_VERSION }}
+          paths:
+            - ./node_modules
   release:
       executor: node-executor
       steps:
@@ -89,6 +108,15 @@ workflows:
             - build-and-test
   run-release-workflow:
     jobs:
+      - release-to-uat-approval:
+          type: approval
+          filters:
+            # ignore any commit on any branch by default
+            branches:
+              ignore: /.*/
+            # only act on version tags
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*$/
       - deploy-code-to-uat:
           filters:
             # ignore any commit on any branch by default
@@ -97,7 +125,9 @@ workflows:
             # only act on version tags
             tags:
               only: /^v[0-9]+(\.[0-9]+)*$/
-      - git-tag-uat:
+          requires:
+              - release-to-uat-approval
+      - github-uat-release:
           filters:
             # ignore any commit on any branch by default
             branches:
@@ -118,6 +148,16 @@ workflows:
               only: /^v[0-9]+(\.[0-9]+)*$/
           requires:
             - deploy-code-to-uat
+      - git-tag-uat:
+          filters:
+            # ignore any commit on any branch by default
+            branches:
+              ignore: /.*/
+            # only act on version tags
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*$/
+          requires:
+            - release-to-prod-approval
       - deploy-code-to-prod:
           filters:
             # ignore any commit on any branch by default
