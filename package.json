@@ -8,7 +8,7 @@
     "release:prod": "sfdc-release -e Production"
   },
   "devDependencies": {
-    "@bhanucp/digital-app-release": "^1.3.1"
+    "@bhanucp/digital-app-release": "^1.3.2"
   },
   "author": "",
   "license": "ISC"
