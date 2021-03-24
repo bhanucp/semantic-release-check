@@ -169,6 +169,7 @@ workflows:
           requires:
             - release-to-prod-approval
       - github-prod-release:
+          context: SECURECREDS
           filters:
             # ignore any commit on any branch by default
             branches:
