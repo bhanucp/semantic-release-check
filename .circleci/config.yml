@@ -179,7 +179,8 @@ workflows:
               only: /^v[0-9]+(\.[0-9]+)*$/
           requires:
             - deploy-code-to-prod
-      - git-tag-prod:
+      - tag-prod-commit-approval:
+          type: approval
           filters:
             # ignore any commit on any branch by default
             branches:
@@ -189,3 +190,13 @@ workflows:
               only: /^v[0-9]+(\.[0-9]+)*$/
           requires:
             - github-prod-release
+      - git-tag-prod:
+          filters:
+            # ignore any commit on any branch by default
+            branches:
+              ignore: /.*/
+            # only act on version tags
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*$/
+          requires:
+            - tag-prod-commit-approval
